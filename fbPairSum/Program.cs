@@ -22,7 +22,7 @@ class FBStuf
     private static void testSubTrees()
     {
         //Testcase 1
-        int n_1 = 3, q_1 = 1;
+        /*int n_1 = 3, q_1 = 1;
         String s_1 = "aba";
         TreeNode.Node root_1 = new TreeNode.Node(1);
         root_1.children.Add(new TreeNode.Node(2));
@@ -30,6 +30,22 @@ class FBStuf
         List<TreeNode.Query> queries_1 = new List<TreeNode.Query>();
         queries_1.Add(new TreeNode.Query(1, 'a'));
         int[] output_1 = TreeNode.CountOfNodes(root_1, queries_1, s_1);
+        */
+        int n_2 = 7, q_2 = 3;
+        String s_2 = "abaacab";
+        TreeNode.Node root_2 = new TreeNode.Node(1);
+        root_2.children.Add(new TreeNode.Node(2));
+        root_2.children.Add(new TreeNode.Node(3));
+        root_2.children.Add(new TreeNode.Node(7));
+        root_2.children[0].children.Add(new TreeNode.Node(4));
+        root_2.children[0].children.Add(new TreeNode.Node(5));
+        root_2.children[1].children.Add(new TreeNode.Node(6));
+        List<TreeNode.Query> queries_2 = new List<TreeNode.Query>();
+      //  queries_2.Add(new TreeNode.Query(1, 'a'));
+       // queries_2.Add(new TreeNode.Query(2, 'b'));
+           queries_2.Add(new TreeNode.Query(3, 'a'));
+        int[] output_2 = TreeNode.CountOfNodes(root_2, queries_2, s_2);
+        int[] expected_2 = { 4, 1, 2 };
 
     }
 }
@@ -204,7 +220,9 @@ public class TreeNode
             }
             else
             {
-                queriesCounters.Add(CountNodes(searchRoot, q, s));
+                int count = 0;
+                CountNodes(searchRoot, q, s, ref count);
+                queriesCounters.Add(count);
             }
         }
         return queriesCounters.ToArray();
@@ -214,40 +232,49 @@ public class TreeNode
 
     private static Node GetStartingNode(Node root, int u)
     {
-        Node newRoot = null;
-        if (root.val == u)
-            return root;
-        else
+        if (root != null)
         {
-            if (root.children == null || root.children.Count == 0)
+            if (root.val == u)
+                return root;
+            else if (root.children.Count > 0)
             {
-                newRoot = (root.val == u) ? root : null;
-            }
-            else
-            {
-
                 foreach (Node child in root.children)
                 {
-                    newRoot = GetStartingNode(child, u);
+                    Node result = GetStartingNode(child, u);
+                    if (result != null) {
+                        return result;
+                    }
                 }
             }
         }
-
-            
-        return newRoot;
+        return null;
     }
 
-    private static int CountNodes(Node root, Query q, string s)
+    private static int CountNodesReturn(Node root, Query q, string s)
     {
 
-        if (root.children != null)
+        if (root.children != null && root.children.Count > 0)
         {
             foreach (Node child in root.children)
             {
-                return (s[root.val] == q.c ? 1 : 0) + CountNodes(child, q, s);
+                return (s[root.val - 1] == q.c ? 1 : 0) + CountNodesReturn(child, q, s);
             }
         }
-        //else
-        return s[root.val] == q.c ? 1 : 0;
+        else
+            return s[root.val - 1] == q.c ? 1 : 0;
+        return 0;
+    }
+
+    private static void CountNodes(Node root, Query q, string s, ref int count)
+    {
+        count += (s[root.val - 1] == q.c ? 1 : 0);
+        if (root.children != null && root.children.Count > 0)
+        {
+            foreach (Node child in root.children)
+            {
+                CountNodes(child, q, s, ref count);
+            }
+        }
+
     }
 }
